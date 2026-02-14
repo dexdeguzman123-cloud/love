@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #ff4f81;
+            --bg: #f0f0f0;
+            --card: #ffffff;
+            --border: #000000;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: #000;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/Desktop - 1 (2).png');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .page.active {
+            display: flex;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        #splash {
+            background: #000;
+            color: var(--primary);
+            z-index: 100;
+        }
+
+        .pulse {
+            animation: pulse-text 1.5s infinite;
+        }
+
+        @keyframes pulse-text {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* TYPING */
+        .typing-container {
+            display: block;
+            width: fit-content;
+            margin: 0 auto 10px auto;
+            overflow: hidden;
+        }
+
+        .typing-text {
+            display: inline-block;
+            overflow: hidden;
+            border-right: .15em solid transparent;
+            white-space: nowrap;
+            width: 0;
+        }
+
+        .active .typing-text {
+            animation:
+                typing 1.5s steps(25, end) forwards,
+                blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        @keyframes blink-caret {
+
+            from,
+            to {
+                border-color: transparent
+            }
+
+            50% {
+                border-color: var(--primary);
+            }
+        }
+
+        /* DELAY */
+        .delayed-element {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in;
+        }
+
+        .delayed-element.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        h1,
+        h2 {
+            font-size: clamp(14px, 4vw, 22px);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        p {
+            font-size: clamp(8px, 2.5vw, 12px);
+            margin: 5px 0;
+        }
+
+        .glass-card {
+            background: var(--card);
+            border: 4px solid var(--border);
+            padding: 25px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        /* Carousel container */
+        .carousel-viewport {
+            width: 100%;
+            max-width: 350px;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 20px 0;
+
+            /* NEW: smaller height */
+            height: 380px;
+            /* adjust as needed */
+        }
+
+        /* Hide scrollbar for cleaner look */
+        .carousel-viewport::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Carousel items */
+        .carousel-item {
+            flex: 0 0 70%;
+            /* smaller width so next image peeks */
+            scroll-snap-align: center;
+            border: 4px solid var(--border);
+            height: 100%;
+            /* match viewport height */
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            z-index: 1000;
+        }
+
+        button {
+            padding: 12px 18px;
+            border: 4px solid var(--border);
+            background: var(--card);
+            color: #000;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        button.primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        button.secondary {
+            background: var(--bg);
+            font-size: 8px;
+            margin-top: 10px;
+        }
+
+        /* ORIGINAL VERTICAL GALLERY */
+        .message-header {
+            background: var(--card);
+            border: 4px solid var(--border);
+            padding: 20px;
+            max-width: 500px;
+            margin: 40px auto 20px auto;
+        }
+
+        .vertical-gallery {
+            display: none;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+        }
+
+        .vertical-gallery img {
+            width: calc(50% - 15px);
+            max-height: 350px;
+            object-fit: cover;
+            border: 4px solid var(--border);
+        }
+
+        /* FULLSCREEN LIGHTBOX */
+        #lightboxOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            cursor: zoom-out;
+        }
+
+        #lightboxOverlay img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border: 4px solid var(--border);
+            /* keeps pixelated style */
+        }
+
+        #page3.active {
+            display: block;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        /* PAGE 4 */
+        .envelope-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 80px;
+        }
+
+        .envelope {
+            position: relative;
+            width: 250px;
+            height: 150px;
+            cursor: pointer;
+        }
+
+        .envelope .body {
+            width: 100%;
+            height: 100%;
+            background: #ff4f81;
+            border-radius: 8px;
+        }
+
+        .envelope .flap {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: #ff7aa2;
+            clip-path: polygon(0 0, 100% 0, 50% 60%);
+            transition: transform 0.6s ease;
+            transform-origin: top;
+        }
+
+        .envelope.open .flap {
+            transform: rotateX(180deg);
+        }
+
+        .passcode-box {
+            margin-top: 20px;
+        }
+
+        .passcode-box input {
+            padding: 10px;
+            font-size: 18px;
+            text-align: center;
+            width: 100px;
+        }
+
+        .passcode-box button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #ff4f81;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .secret-content {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            margin-top: -220px;
+            pointer-events: none;
+        }
+
+        .secret-content.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .secret-content img {
+            width: 100%;
+            max-width: 300px;
+            object-fit: cover;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            70% {
+                transform: scale(0.95);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .secret-content.show img {
+            animation: bounceIn 0.8s ease forwards;
+        }
+
+        #easterHint {
+            animation: pulseHint 2s infinite;
+        }
+
+        @keyframes pulseHint {
+
+            0%,
+            100% {
+                opacity: 0.8;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* ========================
+   MOBILE RESPONSIVE
+======================== */
+
+        /* General page adjustments */
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+            }
+
+            h1,
+            h2,
+            p {
+                font-size: clamp(10px, 3vw, 8px);
+            }
+
+            .glass-card {
+                padding: 15px;
+                max-width: 90%;
+            }
+
+
+            /* Vertical gallery adjustments */
+            .vertical-gallery {
+                max-width: 95%;
+                gap: 8px;
+            }
+
+            .vertical-gallery img {
+                width: 100%;
+                /* stack vertically for mobile */
+                max-height: 250px;
+            }
+
+            /* Buttons */
+            button {
+                font-size: 9px;
+                padding: 10px 14px;
+            }
+
+            button.primary {
+                padding: 12px 16px;
+            }
+
+            /* Envelope adjustments */
+            .envelope {
+                width: 180px;
+                height: 110px;
+            }
+
+            /* Secret content image */
+            .secret-content img {
+                max-width: 220px;
+            }
+
+            /* Easter hint text smaller */
+            #easterHint {
+                font-size: 9px;
+            }
+        }
+
+        /* Extra small screens (mobile portrait) */
+        @media (max-width: 480px) {
+
+            .vertical-gallery img {
+                max-height: 200px;
+            }
+
+            .envelope {
+                width: 150px;
+                height: 90px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <audio id="bg-music" src="/bgretro.mp3" loop autoplay></audio>
+    <!-- SPLASH -->
+    <div class="page active" id="splash">
+        <h1 class="pulse">STARTING...</h1>
+        <p style="margin-top:20px;color:white;">INITIALIZING LOVE.EXE</p>
+    </div>
+    <!-- PAGE 1 -->
+    <div class="page" id="page1">
+        <div class="glass-card">
+            <div class="typing-container">
+                <h1><span class="typing-text">Hey Love ❤️</span></h1>
+            </div>
+            <div class="typing-container">
+                <p><span class="typing-text" style="animation-delay:1.5s;">I made something special...</span></p>
+            </div>
+            <div class="typing-container">
+                <p><span class="typing-text" style="animation-delay:2.5s;">Just for you.</span></p>
+            </div>
+            <div class="delayed-element" data-delay="4000">
+                <button class="primary" onclick="goPage(2)">Open It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2 — HER IMAGE (ORIGINAL CAROUSEL SIZE) -->
+    <div class="page" id="page2">
+        <div class="typing-container">
+            <h2><span class="typing-text">The Most Beautiful Girl <button id="secretHeart"
+                        style="font-size: 32px; background: none; border: none; cursor: pointer;"
+                        title="Find the secret heart for a reward 💌">
+                        💖
+                    </button></span></h2>
+        </div>
+
+        <div class="delayed-element" data-delay="2700">
+            <div class="carousel-viewport">
+                <div class="carousel-item"><img src="/Foryou/2 (10).jpg"></div>
+                <div class="carousel-item"><img src="/Foryou/2 (11).jpg"></div>
+                <div class="carousel-item"><img src="/Foryou/2 (13).jpg"></div>
+                <div class="carousel-item"><img src="/Foryou/2 (3).jpg"></div>
+                <div class="carousel-item"><img src="/Foryou/2 (4).jpg"></div>
+                <div class="carousel-item"><img src="/Foryou/2 (6).jpg"></div>
+            </div>
+
+            <div class="btn-group">
+                <button class="primary" onclick="goPage(3)">Continue</button>
+            </div>
+            <button class="secondary" onclick="goPage(1)">Back</button>
+        </div>
+    </div>
+
+    <!-- PAGE 3 — OUR IMAGE + MESSAGE (ORIGINAL GRID SIZE) -->
+    <div class="page" id="page3">
+        <div class="message-header">
+            <div class="typing-container">
+                <h1><span class="typing-text">My Message 💌</span></h1>
+            </div>
+            <div class="typing-container">
+                <p><span class="typing-text" style="animation-delay:1.2s;">Happy Valentine's Day ❤️</span></p>
+            </div>
+            <div class="typing-container">
+                <p><span class="typing-text" style="animation-delay:2.5s;">Thank you for being my safe place.</span></p>
+            </div>
+            <div class="typing-container">
+                <p><span class="typing-text" style="animation-delay:4s;">I choose you. Always.</span></p>
+            </div>
+            <div class="delayed-element" data-delay="5500">
+                <button class="primary" onclick="revealGallery()">Open This 🎁</button>
+            </div>
+        </div>
+
+        <div class="vertical-gallery" id="photo-gallery">
+
+            <p><span>TAP THE IMAGES TO VIEW FULL SIZE</span></p>
+            <img src="/Foryou/1 (11).jpg">
+            <img src="/Foryou/1 (7).jpg">
+            <img src="/Foryou/1 (8).jpg">
+            <img src="/Foryou/1 (9).jpg">
+            <img src="/Foryou/1 (10).jpg">
+        </div>
+
+        <div class="delayed-element" id="game-btn-container">
+            <div class="btn-group">
+                <button class="primary" onclick="goPage(4)">Continue</button>
+            </div>
+            <div class="btn-group">
+                <button class="secondary" onclick="goPage(2)">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 4 -->
+    <section class="page" id="page4">
+        <h2>For You 💌</h2>
+
+        <div class="envelope-container">
+            <div class="envelope" id="envelope">
+                <div class="flap"></div>
+                <div class="body"></div>
+            </div>
+        </div>
+
+        <div class="passcode-box" id="passcodeBox">
+            <p>Enter 4-Digit Passcode</p>
+            <input type="password" maxlength="4" id="passcodeInput" />
+            <button onclick="checkPasscode()">Unlock</button>
+            <p id="errorText"></p>
+        </div>
+
+        <div class="secret-content" id="secretContent">
+            <img src="/pngegg (3).png" alt="Bembangan na">
+            <div class="typing-container">
+                <p><span class="typing-text" style="animation-delay:1.5s;">BEMBANGAN NA</span></p>
+            </div>
+        </div>
+        <div class="delayed-element" data-delay="7000">
+            <p id="easterHint" style="font-size:10px; color:#ff4f81; margin-top:20px; opacity:0.8; text-align:center;">
+                💌Psst! If you find a secret button 💖 on the previous page, you have a special reward!💌
+            </p>
+            <button class="primary" onclick="location.reload()">Restart</button>
+        </div>
+    </section>
+
+    <script>
+        // ========================
+        // GLOBAL VARIABLES
+        // ========================
+        let activeTimers = [];
+
+        // ========================
+        // BACKGROUND MUSIC (HIDDEN) AUTOPLAY
+
+        // ========================
+        // BUTTON CLICK SOUND
+        // ========================
+        const clickSound = document.createElement("audio");
+        clickSound.src = "/click.mp3"; // your button click sound
+        clickSound.preload = "auto";
+        clickSound.volume = 0.3;
+        clickSound.style.display = "none";
+        document.body.appendChild(clickSound);
+
+        // ========================
+        // PAGE NAVIGATION
+        // ========================
+        window.addEventListener('load', () => {
+            // Show first page after splash delay
+            setTimeout(() => goPage(1), 3000);
+        });
+
+        const secretSound = document.createElement("audio");
+        secretSound.src = "/secret"; // sound for secret content
+        secretSound.preload = "auto";
+        secretSound.volume = 0.5;
+        secretSound.style.display = "none";
+        document.body.appendChild(secretSound);
+
+        function goPage(n) {
+            // Play click sound
+            clickSound.currentTime = 0;
+            clickSound.play().catch(() => { });
+
+            // Clear previous timers
+            activeTimers.forEach(clearTimeout);
+            activeTimers = [];
+
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const page = document.getElementById(`page${n}`);
+            if (page) page.classList.add('active');
+
+            // Reset typing animation for this page (CSS only, no sound)
+            const typingTexts = page.querySelectorAll('.typing-text');
+            typingTexts.forEach(el => {
+                const delay = el.style.animationDelay || 0;
+                el.style.animation = 'none';
+                el.offsetHeight; // trigger reflow
+                el.style.animation = null;
+                el.style.animationDelay = delay;
+            });
+
+            // Handle delayed elements
+            const delayed = page.querySelectorAll('.delayed-element');
+            delayed.forEach(el => el.classList.remove('show'));
+            delayed.forEach(el => {
+                const wait = el.getAttribute('data-delay');
+                if (wait) {
+                    const t = setTimeout(() => el.classList.add('show'), wait);
+                    activeTimers.push(t);
+                }
+            });
+
+            // Page 3 special handling (gallery hidden initially)
+            if (n === 3) {
+                const gallery = document.getElementById('photo-gallery');
+                if (gallery) gallery.style.display = 'none';
+                const btnContainer = document.getElementById('game-btn-container');
+                if (btnContainer) btnContainer.classList.remove('show');
+            }
+        }
+
+        // ========================
+        // GALLERY REVEAL
+        // ========================
+        function revealGallery() {
+            clickSound.currentTime = 0;
+            clickSound.play().catch(() => { });
+
+            const gallery = document.getElementById('photo-gallery');
+            if (gallery) gallery.style.display = 'flex';
+
+            const btnContainer = document.getElementById('game-btn-container');
+            if (btnContainer) btnContainer.classList.add('show');
+        }
+
+        // ========================
+        // PASSCODE CHECK
+        // ========================
+        function checkPasscode() {
+            clickSound.currentTime = 0;
+            clickSound.play().catch(() => { });
+
+            const correctCode = "0921"; // change this
+            const input = document.getElementById("passcodeInput").value;
+            const errorText = document.getElementById("errorText");
+            const envelope = document.getElementById("envelope");
+            const secretContent = document.getElementById("secretContent");
+            const passcodeBox = document.getElementById("passcodeBox");
+
+            if (input === correctCode) {
+                envelope.classList.add("open");
+                errorText.textContent = "";
+
+                // Delay before showing secret image and text
+                setTimeout(() => {
+                    if (secretContent) secretContent.classList.add("show");
+                }, 1200);
+
+                // Hide passcode box after short delay
+                setTimeout(() => {
+                    if (passcodeBox) passcodeBox.style.display = "none";
+                }, 500);
+
+            } else {
+                errorText.textContent = "Wrong Passcode 💔";
+            }
+        }
+
+        
+        // SECRET HEART BUTTON
+        const secretHeart = document.getElementById("secretHeart");
+        if (secretHeart) {
+            secretHeart.addEventListener("click", () => {
+                // Play click sound
+                clickSound.currentTime = 0;
+                clickSound.play().catch(() => { });
+
+                // Reward popup or redirect
+                alert("🎉 You found the secret heart! Here's your special reward: 💌");
+                // Optional: redirect to secret page
+                window.location.href = "https://c.tenor.com/znx_AntI870AAAAC/tenor.gif";
+            });
+        }
+        // CREATE LIGHTBOX ELEMENT
+        const lightbox = document.createElement("div");
+        lightbox.id = "lightboxOverlay";
+        const lightboxImg = document.createElement("img");
+        lightbox.appendChild(lightboxImg);
+        document.body.appendChild(lightbox);
+
+        // CLICK ON GALLERY IMAGE
+        const galleryImages = document.querySelectorAll(".vertical-gallery img");
+        galleryImages.forEach(img => {
+            img.style.cursor = "pointer"; // show pointer on hover
+            img.addEventListener("click", () => {
+                lightboxImg.src = img.src;
+                lightbox.style.display = "flex";
+            });
+        });
+
+        // CLICK ON LIGHTBOX TO CLOSE
+        lightbox.addEventListener("click", () => {
+            lightbox.style.display = "none";
+        });
+    </script>
+
+
+</body>
+
+</html>
